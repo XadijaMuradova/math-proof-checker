@@ -1,14 +1,49 @@
 name: Math Proof Checker Pipeline
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
+    branches: [ main ]
+  push:
     branches: [ main ]
 
 jobs:
   Build_Test:
     runs-on: ubuntu-latest
+   steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+     
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run proof validation
+        run: |
+          python check_proof.py
+
+      - name: Save validation result
+        run: |
+          mkdir -p output
+          echo "Proof checked successfully" > output/validation.txt
+
+      - name: Upload CI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: proof-validation
+          path: output/
+
+  Build_Deploy:
+    needs: Build_Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,25 +53,25 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Run proof validation
-        run: python check_proof.py
-  Build_Deploy:
-    needs: Build_Test
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Generate Report
+      - name: Install dependencies
         run: |
-          mkdir -p output
-          echo "Proof validation completed successfully at $(date)" > output/report.txt
-          # Əgər generate_report.py işlətmək istəsəniz, aşağıdakı sətri aktiv edə bilərsiniz:
-          # python generate_report.py > output/detailed_analysis.txt
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Upload Artifact
+      - name: Generate proof report
+        run: |
+          python generate_report.py --input proofs/ --output report.txt
+
+      - name: Prepare release folder
+        run: |
+          mkdir -p dist
+          mv report.txt dist/
+
+      - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
-          name: math-report
-          path: output/
+          name: proof-report
+          path: dist/
+
+      - name: Deployment log
+        run: echo "Deployment completed successfully "
