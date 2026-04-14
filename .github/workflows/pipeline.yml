@@ -28,7 +28,7 @@ jobs:
           echo "Proof checked successfully" > validation.txt
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: proof-validation
           path: validation.txt
