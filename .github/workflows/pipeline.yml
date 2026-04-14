@@ -7,12 +7,12 @@ on:
     branches: [ main ]
 
 jobs:
-
   CI_Test:
     name: CI - Proof Validation
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -23,17 +23,17 @@ jobs:
       - name: Install dependencies
         run: pip install sympy reportlab
 
-      - name: Run validation
+      - name: Run proof checker
         run: python check_proof.py
 
-
   CD_Deploy:
-    name: CD - Report Generation
+    name: CD - Report Generation & Deploy Simulation
     needs: CI_Test
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -44,11 +44,24 @@ jobs:
       - name: Install dependencies
         run: pip install sympy reportlab
 
-      - name: Generate report
+      - name: Create dist folder
+        run: mkdir -p dist
+
+      - name: Generate PDF report
         run: python generate_report.py
+
+      - name: Show output files
+        run: ls -R dist
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: math-report
+          name: math-proof-report
           path: dist/
+
+      - name: Deployment simulation
+        run: |
+          echo "CD SUCCESS "
+          echo "Report generated in dist/"
+          echo "Artifact uploaded to GitHub"
+          echo "No real deployment (simulation)"
