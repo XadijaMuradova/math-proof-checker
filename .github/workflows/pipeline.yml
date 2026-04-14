@@ -1,46 +1,41 @@
-
-   name: Math Proof Checker & Report Pipeline
+name: Math Proof Checker Pipeline
 
 on:
-  pull_request:
-    branches: [ main ]
   push:
+    branches: [ main ]
+  pull_request:
     branches: [ main ]
 
 jobs:
   Build_Test:
     runs-on: ubuntu-latest
     steps:
-      - name: Repository-ni yüklə
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Python mühitini qur
+      - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Sübutun doğruluğunu yoxla (Validation)
+      - name: Run proof validation
         run: python check_proof.py
-
-      - name: Riyazi testləri icra et
-        run: echo "Riyazi tənliklər və düsturlar yoxlanılır..."
 
   Build_Deploy:
     needs: Build_Test
-    if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    if: github.event_name == 'push'
     steps:
-      - name: Repository-ni yüklə
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Hesabatı generasiya et (Deployment imitasiyası)
+      - name: Generate Report
         run: |
-          mkdir -p release
-          echo "Sübut təsdiqləndi. Tarix: $(date)" > release/final_report.txt
-          echo "PDF hesabat yaradılır..." > release/report_log.log
+          mkdir -p output
+          echo "Proof validation completed successfully." > output/report.txt
 
-      - name: Hesabatı Artifact olaraq yadda saxla
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: math-proof-result
-          path: release/
+          name: math-report
+          path: output/
