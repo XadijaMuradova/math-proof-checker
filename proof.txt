@@ -1,4 +1,4 @@
-Theorem: Sum of two even numbers is even.
+Theorem: Sum of two even numbers is odd.
 
 Proof:
 Let a = 2k and b = 2m
