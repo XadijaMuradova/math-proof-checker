@@ -1,0 +1,61 @@
+name: Math Proof Checker Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  Build_Test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Run proof validation
+        run: |
+          python check_proof.py
+
+      - name: Save validation result
+        run: |
+          echo "Proof checked successfully" > validation.txt
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: proof-validation
+          path: validation.txt
+
+  Build_Deploy:
+    needs: Build_Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Generate report
+        run: |
+          python generate_report.py
+
+      - name: Simulate deployment
+        run: |
+          mkdir dist
+          mv report.txt dist/
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: proof-report
+          path: dist/
+
+      - name: Deployment log
+        run: echo "Deployment completed "
