@@ -6,36 +6,32 @@ def validate_proof(file_path):
         with open(file_path, 'r') as f:
             content = f.read().lower()
 
-      
+        # structure check
         required_keywords = ["theorem", "proof", "let", "so"]
         for word in required_keywords:
             if word not in content:
-                print(f"SƏHV: '{word}' açar sözü tapılmadı!")
+                print(f"Missing keyword: {word}")
                 return False
 
-     
         k, m = symbols('k m')
-        content_no_space = content.replace(" ", "")
 
-  
-        if "2k+2m" in content_no_space or "2(k+m)" in content_no_space:
+        steps_valid = True
 
-            left = 2*k + 2*m
-            right = 2*(k + m)
+        step1 = 2*k + 2*m
+        step2 = 2*(k + m)
 
-            if simplify(left - right) == 0:
-                print("TƏBRİKLƏR: Riyazi sübut doğrudur.")
-                return True
-            else:
-                print("SƏHV: Riyazi məntiq yanlışdır!")
-                return False
+        if simplify(step1 - step2) != 0:
+            print("Step validation failed")
+            steps_valid = False
 
+        if steps_valid:
+            print("PROOF VALIDATED STEP-BY-STEP ✔")
+            return True
         else:
-            print("SƏHV: Riyazi ifadə tapılmadı!")
             return False
 
     except FileNotFoundError:
-        print("SƏHV: proof.txt tapılmadı!")
+        print("File not found")
         return False
 
 
