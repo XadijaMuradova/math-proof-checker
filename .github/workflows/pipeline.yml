@@ -20,7 +20,6 @@ jobs:
 
       - name: Run proof validation
         run: python check_proof.py
-
   Build_Deploy:
     needs: Build_Test
     runs-on: ubuntu-latest
@@ -32,7 +31,9 @@ jobs:
       - name: Generate Report
         run: |
           mkdir -p output
-          echo "Proof validation completed successfully." > output/report.txt
+          echo "Proof validation completed successfully at $(date)" > output/report.txt
+          # Əgər generate_report.py işlətmək istəsəniz, aşağıdakı sətri aktiv edə bilərsiniz:
+          # python generate_report.py > output/detailed_analysis.txt
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
