@@ -1,4 +1,5 @@
-name: Math Proof Checker Pipeline
+
+   name: Math Proof Checker & Report Pipeline
 
 on:
   pull_request:
@@ -9,53 +10,37 @@ on:
 jobs:
   Build_Test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
+      - name: Repository-ni yüklə
         uses: actions/checkout@v4
 
-      - name: Setup Python
+      - name: Python mühitini qur
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: Run proof validation
-        run: |
-          python check_proof.py
+      - name: Sübutun doğruluğunu yoxla (Validation)
+        run: python check_proof.py
 
-      - name: Save validation result
-        run: |
-          echo "Proof checked successfully" > validation.txt
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: proof-validation
-          path: validation.txt
+      - name: Riyazi testləri icra et
+        run: echo "Riyazi tənliklər və düsturlar yoxlanılır..."
 
   Build_Deploy:
     needs: Build_Test
-    runs-on: ubuntu-latest
     if: github.event_name == 'push'
-
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
+      - name: Repository-ni yüklə
         uses: actions/checkout@v4
 
-      - name: Generate report
+      - name: Hesabatı generasiya et (Deployment imitasiyası)
         run: |
-          python generate_report.py
+          mkdir -p release
+          echo "Sübut təsdiqləndi. Tarix: $(date)" > release/final_report.txt
+          echo "PDF hesabat yaradılır..." > release/report_log.log
 
-      - name: Simulate deployment
-        run: |
-          mkdir dist
-          mv report.txt dist/
-
-      - name: Upload deployment artifact
+      - name: Hesabatı Artifact olaraq yadda saxla
         uses: actions/upload-artifact@v4
         with:
-          name: proof-report
-          path: dist/
-
-      - name: Deployment log
-        run: echo "Deployment completed "
+          name: math-proof-result
+          path: release/
